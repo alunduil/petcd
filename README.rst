@@ -35,8 +35,8 @@ simple::
 
 The current status of the build is:
 
-.. image:: https://secure.travis-ci.org/alunduil/tetcd.png?branch=master
-    :target: http://travis-ci.org/alunduil/tetcd
+.. image:: https://secure.travis-ci.org/kumoru/tetcd.png?branch=master
+    :target: http://travis-ci.org/kumoru/tetcd
 
 Authors
 =======

@@ -18,7 +18,7 @@ from codecs import open
 from setuptools import find_packages
 from setuptools import setup
 
-with open(os.path.join(os.path.dirname(__file__), 'tetcd', 'information.py'), 'r', encoding = 'utf-8') as fh:
+with open(os.path.join(os.path.dirname(__file__), 'petcd', 'information.py'), 'r', encoding = 'utf-8') as fh:
     exec(fh.read(), globals(), locals())
 
 PARAMS = {}
@@ -67,6 +67,7 @@ PARAMS['keywords'] = (
 PARAMS['packages'] = find_packages(exclude = ( 'test_*', ))
 
 PARAMS['install_requires'] = (
+    'mypy-lang',
     'tornado',
 )
 

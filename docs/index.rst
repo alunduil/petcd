@@ -1,9 +1,9 @@
-.. tetcd documentation master file, created by
+.. petcd documentation master file, created by
    sphinx-quickstart on Mon Apr 20 10:17:35 2015.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to tetcd's documentation!
+Welcome to petcd's documentation!
 =================================================
 
 Contents:

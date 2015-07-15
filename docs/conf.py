@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# tetcd documentation build configuration file, created by
+# petcd documentation build configuration file, created by
 # sphinx-quickstart on Mon Apr 20 10:17:35 2015.
 #
 # This file is execfile()d with the current directory set to its
@@ -20,7 +20,7 @@ import sys
 
 from codecs import open
 
-with open(os.path.join(os.path.dirname(__file__), '..', 'tetcd', 'information.py'), 'r', encoding = 'utf-8') as fh:
+with open(os.path.join(os.path.dirname(__file__), '..', 'petcd', 'information.py'), 'r', encoding = 'utf-8') as fh:
     exec(fh.read(), globals(), locals())
 
 # If extensions (or modules to document with autodoc) are in another directory,

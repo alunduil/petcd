@@ -11,3 +11,61 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+
+class AsyncEtcdClient(object):
+    '''Asynchronous etcd client.
+
+    Properties
+    ----------
+
+    * ``etcd_index``
+    * ``follow_redirects``
+    * ``retries``
+    * ``url``
+    * ``cluster``
+    * ``nodes``
+
+    Public Methods
+    --------------
+
+    * ``get``
+    * ``set``
+    * ``delete``
+    * ``mkdir``
+    * ``ls``
+    * ``watch``
+    * ``first``
+    * ``get_dict``
+    * ``get_list``
+    * ``get_value``
+    * ``get_json``
+
+    Examples
+    --------
+
+    TODO Add examples
+
+    '''
+
+    def __init__(self, url, retries = 1, follow_redirects = True):
+        '''Create AsyncEtcdClient.
+
+        Parameters
+        ----------
+
+        :``follow_redirects``: follow redirect responses (3xx)
+        :``retries``:          number of times to retry failed requests
+        :``url``:              URL for etcd
+
+        '''
+
+        self._follow_redirects = follow_redirects
+        self._retries = retries
+        self._url = url
+
+    @property
+    def url(self):
+        '''URL for etcd.'''
+
+        return self._url

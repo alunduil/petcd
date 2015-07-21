@@ -14,6 +14,7 @@
 
 import functools
 import itertools
+import logging
 
 from torment import fixtures
 from torment import helpers
@@ -21,6 +22,9 @@ from typing import Any
 from typing import Iterable
 
 from test_petcd.test_unit import AsyncEtcdClientInitFixture
+from test_petcd.test_unit import AsyncEtcdClientPropertyFixture
+
+logger = logging.getLogger(__name__)
 
 
 def powerset(iterable: Iterable[Any]) -> Iterable[Iterable[Any]]:
@@ -53,30 +57,19 @@ def powerset(iterable: Iterable[Any]) -> Iterable[Iterable[Any]]:
     s = list(iterable)
     return itertools.chain.from_iterable(itertools.combinations(s, r) for r in range(len(s) + 1))
 
-base = {
-    'parameters': {
-        'kwargs': {
-            'url': 'http://localhost:4001/v2',
-        },
-    },
-
-    'expected': {
-        '_url': 'http://localhost:4001/v2',
-        '_retries': 1,
-        '_follow_redirects': True,
-    },
+expected = {
+    '_url': 'http://localhost:7379/v2',
+    '_retries': 1,
+    '_follow_redirects': True,
 }
 
-properties = [
-    { 'retries': 0, },
-    { 'follow_redirects': False, },
-]
+properties = [ { fixture.property: fixture.expected, } for fixture in fixtures.of(( AsyncEtcdClientPropertyFixture, )) ]
 
 for subset in powerset(properties):
     fixtures.register(globals(), ( AsyncEtcdClientInitFixture, ), {
         'parameters': {
-            'kwargs': functools.reduce(helpers.extend, [ base['parameters']['kwargs'] ] + list(subset), {}),
+            'kwargs': functools.reduce(helpers.extend, list(subset), {}),
         },
 
-        'expected': functools.reduce(helpers.extend, [ base['expected'] ] + [ { '_' + key: value for key, value in _.items() } for _ in list(subset) ], {}),
+        'expected': functools.reduce(helpers.extend, [ expected ] + [ { '_' + key: value for key, value in _.items() } for _ in list(subset) ], {}),
     })

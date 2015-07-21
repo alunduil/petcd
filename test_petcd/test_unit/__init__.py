@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import os
+import typing  # flake8: noqa (use mypy typing)
 
 from torment import fixtures
 from torment import helpers
@@ -22,22 +23,37 @@ from torment import TestContext
 from petcd import AsyncEtcdClient
 
 
-class EtcdClientInitFixture(fixtures.Fixture):
-    def check(self):
+class AsyncEtcdClientInitFixture(fixtures.Fixture):
+    @property
+    def description(self) -> str:
+        return super().description + 'AsyncEtcdClient({0.parameters[kwargs]})'.format(self)
+
+    def run(self) -> None:
+        self.result = AsyncEtcdClient(**self.parameters['kwargs'])
+
+    def check(self) -> None:
         self.context.assertEqual(self.expected, vars(self.result))
 
 
-class AsyncEtcdClientInitFixture(EtcdClientInitFixture):
-    def description(self):
-        return super().description + 'AsyncEtcdClient({0.parameters[kwargs]})'.format(self)
+class AsyncEtcdClientPropertyFixture(fixtures.Fixture):
+    @property
+    def description(self) -> str:
+        return super().description + 'AsyncEtcdClient.{0.property} == {0.expected}'.format(self)
 
-    def run(self):
-        self.result = AsyncEtcdClient(**self.parameters['kwargs'])
+    def setup(self) -> None:
+        self.client = AsyncEtcdClient(**{ self.property: self.expected })
 
-helpers.import_directory(__name__, os.path.dirname(__file__))
+    def run(self) -> None:
+        self.result = getattr(self.client, self.property)
+
+    def check(self) -> None:
+        self.context.assertEqual(self.expected, self.result)
+
+helpers.import_directory(__name__, os.path.dirname(__file__), sort_key = lambda _: -_.count('_') )
 
 
 class ClientUnitTest(TestContext, metaclass = MetaContext):
     fixture_classes = (
         AsyncEtcdClientInitFixture,
+        AsyncEtcdClientPropertyFixture,
     )

@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import typing  # flake8: noqa (use mypy typing)
+
 
 class AsyncEtcdClient(object):
     '''Asynchronous etcd client.
@@ -48,7 +50,7 @@ class AsyncEtcdClient(object):
 
     '''
 
-    def __init__(self, url, retries = 1, follow_redirects = True):
+    def __init__(self, url: str = 'http://localhost:7379/v2', retries: int = 1, follow_redirects: bool = True) -> None:
         '''Create AsyncEtcdClient.
 
         Parameters
@@ -65,7 +67,19 @@ class AsyncEtcdClient(object):
         self._url = url
 
     @property
-    def url(self):
+    def url(self) -> str:
         '''URL for etcd.'''
 
         return self._url
+
+    @property
+    def retries(self) -> int:
+        '''Number of times to retry actions.'''
+
+        return self._retries
+
+    @property
+    def follow_redirects(self):
+        '''True if redirects will be followed; otherwise, False.'''
+
+        return self._follow_redirects

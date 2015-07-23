@@ -26,7 +26,7 @@ from petcd import AsyncEtcdClient
 class AsyncEtcdClientInitFixture(fixtures.Fixture):
     @property
     def description(self) -> str:
-        return super().description + 'AsyncEtcdClient({0.parameters[kwargs]})'.format(self)
+        return super().description + '.AsyncEtcdClient({0.parameters[kwargs]})'.format(self)
 
     def run(self) -> None:
         self.result = AsyncEtcdClient(**self.parameters['kwargs'])
@@ -38,7 +38,7 @@ class AsyncEtcdClientInitFixture(fixtures.Fixture):
 class AsyncEtcdClientPropertyFixture(fixtures.Fixture):
     @property
     def description(self) -> str:
-        return super().description + 'AsyncEtcdClient.{0.property} == {0.expected}'.format(self)
+        return super().description + '.AsyncEtcdClient.{0.property} == {0.expected}'.format(self)
 
     def setup(self) -> None:
         self.client = AsyncEtcdClient(**{ self.property: self.expected })

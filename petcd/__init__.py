@@ -21,27 +21,27 @@ class AsyncEtcdClient(object):
     Properties
     ----------
 
+    * ``cluster``
     * ``etcd_index``
     * ``follow_redirects``
+    * ``nodes``
     * ``retries``
     * ``url``
-    * ``cluster``
-    * ``nodes``
 
     Public Methods
     --------------
 
-    * ``get``
-    * ``set``
     * ``delete``
-    * ``mkdir``
-    * ``ls``
-    * ``watch``
     * ``first``
+    * ``get``
     * ``get_dict``
+    * ``get_json``
     * ``get_list``
     * ``get_value``
-    * ``get_json``
+    * ``ls``
+    * ``mkdir``
+    * ``set``
+    * ``watch``
 
     Examples
     --------

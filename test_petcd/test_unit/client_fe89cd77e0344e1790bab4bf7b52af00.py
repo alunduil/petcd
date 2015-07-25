@@ -13,49 +13,16 @@
 # limitations under the License.
 
 import functools
-import itertools
 import logging
 
 from torment import fixtures
 from torment import helpers
-from typing import Any
-from typing import Iterable
 
+from test_petcd import test_helpers
 from test_petcd.test_unit import AsyncEtcdClientInitFixture
 from test_petcd.test_unit import AsyncEtcdClientPropertyFixture
 
 logger = logging.getLogger(__name__)
-
-
-def powerset(iterable: Iterable[Any]) -> Iterable[Iterable[Any]]:
-    '''Powerset of iterable.
-
-    Parameters
-    ----------
-
-    :``iterable``: set to calculate powerset
-
-    Return Value(s)
-    ---------------
-
-    All subsets of iterable.
-
-    Examples
-    --------
-
-    >>> list(powerset([]))
-    [()]
-
-    >>> list(powerset([ 1, ]))
-    [(), (1,)]
-
-    >>> list(powerset([ 1, 2, ]))
-    [(), (1,), (2,), (1, 2)]
-
-    '''
-
-    s = list(iterable)
-    return itertools.chain.from_iterable(itertools.combinations(s, r) for r in range(len(s) + 1))
 
 expected = {
     '_url': 'http://localhost:7379/v2',
@@ -65,7 +32,7 @@ expected = {
 
 properties = [ { fixture.property: fixture.expected, } for fixture in fixtures.of(( AsyncEtcdClientPropertyFixture, )) ]
 
-for subset in powerset(properties):
+for subset in test_helpers.powerset(properties):
     fixtures.register(globals(), ( AsyncEtcdClientInitFixture, ), {
         'parameters': {
             'kwargs': functools.reduce(helpers.extend, list(subset), {}),

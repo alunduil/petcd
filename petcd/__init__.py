@@ -80,12 +80,6 @@ class AsyncEtcdClient(object):
         return self._follow_redirects
 
     @property
-    def loop(self):
-        '''Event loop used by this client.'''
-
-        return self._loop
-
-    @property
     def retries(self) -> int:
         '''Number of times to retry actions.'''
 

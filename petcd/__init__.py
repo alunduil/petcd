@@ -12,7 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import aiohttp
+import asyncio
+import logging
 import typing  # flake8: noqa (use mypy typing)
+
+from typing import Union
+
+logger = logging.getLogger(__name__)
 
 
 class AsyncEtcdClient(object):
@@ -67,10 +74,16 @@ class AsyncEtcdClient(object):
         self._url = url
 
     @property
-    def url(self) -> str:
-        '''URL for etcd.'''
+    def follow_redirects(self):
+        '''True if redirects will be followed; otherwise, False.'''
 
-        return self._url
+        return self._follow_redirects
+
+    @property
+    def loop(self):
+        '''Event loop used by this client.'''
+
+        return self._loop
 
     @property
     def retries(self) -> int:
@@ -79,7 +92,38 @@ class AsyncEtcdClient(object):
         return self._retries
 
     @property
-    def follow_redirects(self):
-        '''True if redirects will be followed; otherwise, False.'''
+    def url(self) -> str:
+        '''URL for etcd.'''
 
-        return self._follow_redirects
+        return self._url
+
+    @asyncio.coroutine
+    def get(self, key: str, quorum: bool = False, recursive: bool = False, sorted: bool = False, wait: bool = False, wait_index: Union[int, None]  = None):
+        '''Perform a get action on the given key.
+
+        Parameters
+        ----------
+
+        :``key``:        the key to retrieve (i.e. '/foo')
+        :``quorum``:     linearize the read (takes a similar path as write)
+        :``recursive``:  return specified key and all children
+        :``sorted``:     lexicographically sort the list of nodes (children)
+        :``wait``:       wait for an event on the specified key
+        :``wait_index``: point in time (etcd_index) to begin watching for events
+
+        Return Value(s)
+        ---------------
+
+        EtcdResult ??
+
+        '''
+
+        return ( yield from self._request(key = key, method = 'GET', quorum = quorum, recursive = recursive, sorted = sorted, wait = wait, wait_index = wait_index) )
+
+    @asyncio.coroutine
+    def _request(self, key: str, method: str, body: Union[str, None] = None, **kwargs):
+        '''
+
+        '''
+
+        pass

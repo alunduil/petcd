@@ -67,6 +67,7 @@ PARAMS['keywords'] = [
 PARAMS['packages'] = find_packages(exclude = ( 'test_*', ))
 
 PARAMS['install_requires'] = [
+    'aiohttp',
     'mypy-lang',
 ]
 

@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import aiohttp
 import asyncio
 import logging
 import os
@@ -37,7 +38,10 @@ class AsyncEtcdClientInitFixture(fixtures.Fixture):
         self.result = AsyncEtcdClient(**self.parameters['kwargs'])
 
     def check(self) -> None:
-        self.context.assertEqual(self.expected, vars(self.result))
+        _ = vars(self.result)
+
+        self.context.assertIsInstance(_.pop('_session'), aiohttp.ClientSession)
+        self.context.assertEqual(self.expected, _)
 
 
 class AsyncEtcdClientPropertyFixture(fixtures.Fixture):
@@ -54,10 +58,11 @@ class AsyncEtcdClientPropertyFixture(fixtures.Fixture):
     def check(self) -> None:
         self.context.assertEqual(self.expected, self.result)
 
-class AsyncEtcdClientGetFixture(fixtures.Fixture):
+
+class AsyncEtcdClientMethodFixture(fixtures.Fixture):
     @property
     def description(self) -> str:
-        return super().description + '.AsyncEtcdClient.get(**{0.parameters[kwargs]})'.format(self)
+        return super().description + '.AsyncEtcdClient.'
 
     def setup(self) -> None:
         url = 'http://127.0.0.1:2379/v2'
@@ -65,18 +70,41 @@ class AsyncEtcdClientGetFixture(fixtures.Fixture):
         if not self.context.mock_aiohttp():
             url = self.context.host
 
-        _ = unittest.mock.patch.object(AsyncEtcdClient, '_request', unittest.mock.MagicMock())
-        self.mocked_request = _.start()
-        self.context.addCleanup(_.stop)
-
         self.client = AsyncEtcdClient(url, retries = 0)
+
+    def check(self) -> None:
+        if self.context.mock_aiohttp():
+            self.context.mocked_aiohttp_clientsession.request.assert_called_once_with(**self.expected['request'])
+
+
+class AsyncEtcdClientGetFixture(AsyncEtcdClientMethodFixture):
+    @property
+    def description(self) -> str:
+        return super().description + 'get(**{0.parameters[kwargs]})'.format(self)
 
     def run(self) -> None:
         self.context.loop.run_until_complete(self.client.get(**self.parameters['kwargs']))
 
-    def check(self) -> None:
-        self.mocked_request.assert_called_once_with(method = 'GET', **self.expected)
 
+class AsyncEtcdClientSetFixture(AsyncEtcdClientMethodFixture):
+    @property
+    def description(self) -> str:
+        return super().description + 'set(**{0.parameters[kwargs]})'.format(self)
+
+    def run(self) -> None:
+        self.context.loop.run_until_complete(self.client.set(**self.parameters['kwargs']))
+
+
+class AsyncEtcdClientKeyUrlFixture(AsyncEtcdClientMethodFixture):
+    @property
+    def description(self) -> str:
+        return super().description + '._key_url({0.parameters[key]}) == {0.expected}'.format(self)
+
+    def run(self) -> None:
+        self.result = self.client._key_url(self.parameters['key'])
+
+    def check(self) -> None:  # override
+        self.context.assertEqual(self.result, self.expected)
 
 helpers.import_directory(__name__, os.path.dirname(__file__), sort_key = lambda _: -_.count('_') )
 
@@ -87,7 +115,7 @@ class ClientUnitTest(contexts.TestContext, metaclass = contexts.MetaContext):
     fixture_classes = (
         AsyncEtcdClientInitFixture,
         AsyncEtcdClientPropertyFixture,
-        AsyncEtcdClientGetFixture,
+        AsyncEtcdClientMethodFixture,
     )
 
     def __init__(self, *args, **kwargs) -> None:
@@ -105,3 +133,6 @@ class ClientUnitTest(contexts.TestContext, metaclass = contexts.MetaContext):
     @decorators.mock('aiohttp')
     def mock_aiohttp(self):
         self.patch('aiohttp')
+
+        self.mocked_aiohttp_clientsession = unittest.mock.MagicMock()
+        self.mocked_aiohttp.ClientSession.return_value = self.mocked_aiohttp_clientsession

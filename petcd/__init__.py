@@ -57,21 +57,28 @@ class AsyncEtcdClient(object):
 
     '''
 
-    def __init__(self, url: str = 'http://localhost:7379/v2', retries: int = 1, follow_redirects: bool = True) -> None:
+    def __init__(self, url: str = 'http://localhost:7379/v2', connection_limit: int = 10, follow_redirects: bool = True, retries: int = 1) -> None:
         '''Create AsyncEtcdClient.
 
         Parameters
         ----------
 
+        :``url``:              URL for etcd
+        :``connection_limit``: number of simultaneous connections to use
         :``follow_redirects``: follow redirect responses (3xx)
         :``retries``:          number of times to retry failed requests
-        :``url``:              URL for etcd
 
         '''
 
+        self._url = url
+
+        self._connection_limit = connection_limit
         self._follow_redirects = follow_redirects
         self._retries = retries
-        self._url = url
+
+        self._session = aiohttp.ClientSession(
+            connector = aiohttp.TCPConnector(limit = self.connection_limit)
+        )
 
     @property
     def follow_redirects(self):
@@ -90,6 +97,18 @@ class AsyncEtcdClient(object):
         '''URL for etcd.'''
 
         return self._url
+
+    @property
+    def session(self) -> aiohttp.ClientSession:
+        '''aiohttp.ClientSession for this Client.'''
+
+        return self._session
+
+    @property
+    def connection_limit(self) -> int:
+        '''Number of simultaneous connections to etcd.'''
+
+        return self._connection_limit
 
     @asyncio.coroutine
     def get(self, key: str, quorum: bool = False, recursive: bool = False, sorted: bool = False, wait: bool = False, wait_index: Union[int, None]  = None):
@@ -112,12 +131,69 @@ class AsyncEtcdClient(object):
 
         '''
 
-        return ( yield from self._request(key = key, method = 'GET', quorum = quorum, recursive = recursive, sorted = sorted, wait = wait, wait_index = wait_index) )
+        params = {
+            'quorum': quorum, 
+            'recursive': recursive,
+            'sorted': sorted,
+            'wait': wait,
+            'wait_index': wait_index,
+        }
+
+        return ( yield from self.session.request(method = 'GET', url = self._key_url(key), params = params) )
 
     @asyncio.coroutine
-    def _request(self, key: str, method: str, body: Union[str, None] = None, **kwargs):
-        '''
+    def set(self, key: str, value: str, append: bool = False, directory: bool = False, previous_exists: Union[None, bool] = None, previous_index: Union[None, int] = None, previous_value: Union[None, str] = None, ttl: Union[None, int] = None):
+        '''Perform a set action on the given key with the given value.
+
+        Parameters
+        ----------
+
+        :``key``:             the key to set (i.e. '/foo')
+        :``value``:           the value to set
+        :``append``:          append value to auto-incrementing directory
+        :``directory``:       act on a directory
+        :``previous_exists``: only perform set if key already exists
+        :``previous_index``:  only perform set if key's previous index
+        :``previous_value``:  only perform set if key's value
+        :``ttl``:             time to live of key
+
+        Return Value(s)
+        ---------------
+
+        EtcdResult ??
 
         '''
 
-        pass
+        body = {
+            'value': value,
+            'append': append,
+            'directory': directory,
+            'previous_exists': previous_exists,
+            'previous_index': previous_index,
+            'previous_value': previous_value,
+            'ttl': ttl,
+        }
+
+        return ( yield from self.session.request(method = 'PUT', url = self._key_url(key), data = body) )
+
+    def _key_url(self, key: str) -> str:
+        '''Add etcd URL and API endpoint to key.
+
+        Parameters
+        ----------
+
+        :``key``: the key to retrieve an etcd API URL for
+
+        Return Value(s)
+        ---------------
+
+        The etcd API endpoint URL for the given key.
+
+        '''
+
+        if not key.startswith('/'):
+            key = '/' + key
+
+        logger.debug('self.url: %s', self.url)
+
+        return self.url + '/keys' + key

@@ -25,6 +25,7 @@ from test_petcd.test_unit import AsyncEtcdClientPropertyFixture
 logger = logging.getLogger(__name__)
 
 expected = {
+    '_connection_limit': 10,
     '_url': 'http://localhost:7379/v2',
     '_retries': 1,
     '_follow_redirects': True,

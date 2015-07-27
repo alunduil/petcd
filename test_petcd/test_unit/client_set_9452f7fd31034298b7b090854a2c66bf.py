@@ -18,37 +18,40 @@ from torment import fixtures
 from torment import helpers
 
 from test_petcd import test_helpers
-from test_petcd.test_unit import AsyncEtcdClientGetFixture
+from test_petcd.test_unit import AsyncEtcdClientSetFixture
 
 expected = {
-    'quorum': False,
-    'recursive': False,
-    'sorted': False,
-    'wait': False,
-    'wait_index': None,
+    'value': 'bar',
+    'append': False,
+    'directory': False,
+    'previous_exists': None,
+    'previous_index': None,
+    'previous_value': None,
+    'ttl': None,
 }
 
 arguments = [
-    { 'quorum': ( True, ), },
-    { 'recursive': ( True, ), },
-    { 'sorted': ( True, ), },
-    { 'wait_index': ( 0, 1, ), },
-    { 'wait': ( True, ), },
+    { 'append': ( True, ), },
+    { 'directory': ( True, ), },
+    { 'previous_exists': ( False, True, ), },
+    { 'previous_index': ( False, True, ), },
+    { 'previous_value': ( 'bar', ), },
+    { 'ttl': ( 0, 1, ), },
 ]
 
 for combination in test_helpers.powerset(arguments):
     for subset in test_helpers.evert(combination):
-        fixtures.register(globals(), ( AsyncEtcdClientGetFixture, ), {
+        fixtures.register(globals(), ( AsyncEtcdClientSetFixture, ), {
             'parameters': {
-                'kwargs': functools.reduce(helpers.extend, list(subset), { 'key': '/foo', }),
+                'kwargs': functools.reduce(helpers.extend, list(subset), { 'key': '/foo', 'value': 'bar', }),
             },
 
             'expected': {
                 'result': None,
                 'request': {
-                    'method': 'GET',
+                    'method': 'PUT',
                     'url': 'http://127.0.0.1:2379/v2/keys/foo',
-                    'params': functools.reduce(helpers.extend, [ expected ] + list(subset), {}),
+                    'data': functools.reduce(helpers.extend, [ expected ] + list(subset), {}),
                 },
-            }
+            },
         })

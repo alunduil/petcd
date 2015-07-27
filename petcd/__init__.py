@@ -111,6 +111,35 @@ class AsyncEtcdClient(object):
         return self._connection_limit
 
     @asyncio.coroutine
+    def delete(self, key: str, directory: bool = False, previous_index: Union[None, int] = None, previous_value: Union[None, str] = None, recursive: bool = False):
+        '''Perform a delete action on the given key.
+
+        Parameters
+        ----------
+
+        :``key``:             the key to delete (i.e. '/foo')
+        :``directory``:       act on a directory
+        :``previous_index``:  only perform delete if key's previous index
+        :``previous_value``:  only perform delete if key's value
+        :``recursive``:       act on all children as well
+
+        Return Value(s)
+        ---------------
+
+        EtcdResult ??
+
+        '''
+
+        params = {
+            'directory': directory,
+            'previous_index': previous_index,
+            'previous_value': previous_value,
+            'recursive': recursive,
+        }
+
+        return ( yield from self.session.request(method = 'DELETE', url = self._key_url(key), params = params) )
+
+    @asyncio.coroutine
     def get(self, key: str, quorum: bool = False, recursive: bool = False, sorted: bool = False, wait: bool = False, wait_index: Union[int, None]  = None):
         '''Perform a get action on the given key.
 

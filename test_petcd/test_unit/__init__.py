@@ -77,6 +77,15 @@ class AsyncEtcdClientMethodFixture(fixtures.Fixture):
             self.context.mocked_aiohttp_clientsession.request.assert_called_once_with(**self.expected['request'])
 
 
+class AsyncEtcdClientDeleteFixture(AsyncEtcdClientMethodFixture):
+    @property
+    def description(self) -> str:
+        return super().description + 'delete(**{0.parameters[kwargs]})'.format(self)
+
+    def run(self) -> None:
+        self.context.loop.run_until_complete(self.client.delete(**self.parameters['kwargs']))
+
+
 class AsyncEtcdClientGetFixture(AsyncEtcdClientMethodFixture):
     @property
     def description(self) -> str:

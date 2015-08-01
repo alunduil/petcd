@@ -15,7 +15,7 @@
 import aiohttp
 import asyncio
 import logging
-import typing  # flake8: noqa (use mypy typing)
+import typing  # noqa (use mypy typing)
 
 from typing import Union
 
@@ -140,7 +140,7 @@ class AsyncEtcdClient(object):
         return ( yield from self.session.request(method = 'DELETE', url = self._key_url(key), params = params) )
 
     @asyncio.coroutine
-    def get(self, key: str, quorum: bool = False, recursive: bool = False, sorted: bool = False, wait: bool = False, wait_index: Union[int, None]  = None):
+    def get(self, key: str, quorum: bool = False, recursive: bool = False, sorted: bool = False, wait: bool = False, wait_index: Union[int, None] = None):
         '''Perform a get action on the given key.
 
         Parameters
@@ -161,7 +161,7 @@ class AsyncEtcdClient(object):
         '''
 
         params = {
-            'quorum': quorum, 
+            'quorum': quorum,
             'recursive': recursive,
             'sorted': sorted,
             'wait': wait,

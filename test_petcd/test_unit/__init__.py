@@ -16,7 +16,7 @@ import aiohttp
 import asyncio
 import logging
 import os
-import typing  # flake8: noqa (use mypy typing)
+import typing  # noqa (use mypy typing)
 import unittest
 
 from torment import contexts

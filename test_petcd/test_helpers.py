@@ -14,7 +14,7 @@
 
 import itertools
 import logging
-import typing  # flake8: noqa (use mypy typing)
+import typing  # noqa (use mypy typing)
 
 from typing import Any
 from typing import Dict
@@ -29,7 +29,7 @@ def evert(iterable: Iterable[Dict[str, Tuple]]) -> Iterable[Dict[str, Any]]:
 
     Iterates over the list of dictionaries and everts them with their tuple
     values.  For example:
-    
+
     ``[ { 'a': ( 1, 2, ), }, ]``
 
     becomes
